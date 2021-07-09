@@ -1,12 +1,11 @@
 # Docker configuration checklist
 
 - 1. Inspect the image before usage [1. Docker image analysis](escape.md) 
-- 2. Configure the user who run docker [2. Docker Daemon Exposed ](escape.md)
-- 3. TODO 
-- 4. TODO
-- 5. TODO
 
-# To help keep containers secure:
+# Docker configuration checklist
+
+- Inspect the Docker image before usage, isn't impossible the image is backdoored or malicious.
+
 - Do not use the `--privileged` flag or mount a Docker socket inside the container. The docker socket allows for spawning containers, so it is an easy way to take full control of the host, for example, by running another container with the `--privileged` flag.
 
 - Do not run as root inside the container. Use a different user or user namespaces. The root in the container is the same as on host unless remapped with user namespaces. It is only lightly restricted by, primarily, Linux namespaces, capabilities, and cgroups.
@@ -19,6 +18,4 @@
 
 - Adjust seccomp, AppArmor profiles to restrict the actions and syscalls available for the container to the minimum required.
 
-- Use official docker images or build your own based on them. Don’t inherit or use backdoored images.
-
-- Regularly rebuild your images to apply security patches. This goes without saying.
+- Regularly rebuild your images to apply security patches.
