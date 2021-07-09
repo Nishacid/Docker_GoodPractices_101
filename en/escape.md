@@ -4,7 +4,7 @@
 
 Imagine that we have download a image and we want to run it without any check.
 
-<img src="./img/reverse_shell.png" alt="reverse_shell">
+<img src="../img/reverse_shell.png" alt="reverse_shell">
 
 We can see an attacker can simply get a shell on your container.
 
@@ -21,7 +21,7 @@ mydockerimage              latest          00571c260cae   2 minutes ago   108MB
 ╰─➤  dive 00571c260cae
 ```
 
-<img src="./img/dive.png" alt="dive">
+<img src="../img/dive.png" alt="dive">
 
 ### 1. Layers (red)
     This window shows the various layers and stages on the image, information such as the ID of the layer and any command executed in the container.
@@ -34,7 +34,7 @@ mydockerimage              latest          00571c260cae   2 minutes ago   108MB
 
 You can naviguate between windows using "Tab" and "Up" and "Down" for data.
 
-<img src="./img/dive_malicious.png" alt="dive_malicious">
+<img src="../img/dive_malicious.png" alt="dive_malicious">
 
 Take a malicious image for the example, here we can see at the 7th layer the command for the reverse shell. \
 So don't forget to check all layers before running an image !
@@ -56,7 +56,7 @@ hellodocker@ubuntu:~$ groups
 hellodocker docker
 ```
 
-<img src="./img/privesc_outside.png">
+<img src="../img/privesc_outside.png">
 
 This command essentially mounting the host "/" directory to the "/mnt" directory in a new container, chrooting and then connecting via a shell. A simple command that give a root access at the attacker. We can use any image you want, a local image or download an image if there is a internet connection.
 
@@ -99,7 +99,7 @@ You can list capabilities inside a container by using `capsh --print` (apt insta
 
 The most dangerous capability is `CAP_SYS_ADMIN` because you will be able to mount files from the host OS into the container.
 
-<img src="./img/cap_sys_admin.png" alt="cap_sys_admin">
+<img src="../img/cap_sys_admin.png" alt="cap_sys_admin">
 
 A container would be vulnerable to this technique if run with the flags: 
 
@@ -113,11 +113,11 @@ A container would be vulnerable to this technique if run with the flags:
 
 Well configured docker containers won't allow command like fdisk -l. However on missconfigured docker command where the flag `--privileged` is specified, it is possible to get the privileges to see the host drive.
 
-<img src="./img/fdisk.png" alt="fdisk">
+<img src="../img/fdisk.png" alt="fdisk">
 
 We can see **/dev/sda5** who's the host partition.
 
-<img src="./img/iownroot.png" alt="iownroot">
+<img src="../img/iownroot.png" alt="iownroot">
 
 We can now read file from host 
 
@@ -131,20 +131,20 @@ TODO
 
 Container often have very little processes running, run a `ps faux` to see them.
 
-<img src="./img/processes.png" alt="processes">
+<img src="../img/processes.png" alt="processes">
 
 ### <u>Method 2 : dockerenv </u>
 
 Docker containers allow environnements variables provides by the host, using a **.dockerenv** file. \
 You can find this file in **/**. This file is created even the host don't provide any env variable.
 
-<img src="./img/dockerenv.png" alt="dockerenv">
+<img src="../img/dockerenv.png" alt="dockerenv">
 
 ### <u>Method 3 : cgroup </u>
 
 Cgroups are used by containers such as Docker. Find them in **/proc/1/cgroup**.
 
-<img src="./img/cgroup.png" alt="cgroup">
+<img src="../img/cgroup.png" alt="cgroup">
 
 
 

@@ -2,15 +2,15 @@
 
 ## 1. Docker image analysis
 
-Imagine that we have download a image and we want to run it without any check.
+Imaginez que nous avons téléchargé une image et que nous voulons la lancer sans aucune vérification.
 
-<img src="./img/reverse_shell.png" alt="reverse_shell">
+<img src="../img/reverse_shell.png" alt="reverse_shell">
 
-We can see an attacker can simply get a shell on your container.
+Nous pouvons voir qu'un attaquant peut simplement obtenir un shell sur votre conteneur.
 
-[Dive](https://github.com/wagoodman/dive) is a tool for doing a reverse engineering of a Docker image. 
+[Dive](https://github.com/wagoodman/dive) est un outil pour faire du reverse engineering sur une image Docker. 
 
-We need to download image before analysis, then take the image ID as argument for dive.
+Nous devons télécharger l'image avant de l'analyser, puis prendre l'ID de l'image comme argument pour `dive`.
 
 ```
 ╰─➤  docker images                                                           
@@ -21,65 +21,61 @@ mydockerimage              latest          00571c260cae   2 minutes ago   108MB
 ╰─➤  dive 00571c260cae
 ```
 
-<img src="./img/dive.png" alt="dive">
+<img src="../img/dive.png" alt="dive">
 
-### 1. Layers (red)
-    This window shows the various layers and stages on the image, information such as the ID of the layer and any command executed in the container.
+### 1. Layers (rouge)
+    Cette fenêtre montre les différentes couches et étapes de l'image, des informations telles que l'ID de la couche et toute commande exécutée dans le conteneur.
 
-### 2. Image details (blue)
-    Many information and details about the image such as size.
+### 2. Image details (bleu)
+    De nombreuses informations et détails sur l'image tels que la taille.
 
-### 3. Current Layer Contents (green)
-    All contents of the container's filesystem at the selected layer.
+### 3. Current Layer Contents (vert)
+    Tout le contenu du système de fichiers du conteneur au niveau de la couche sélectionnée.
 
-You can naviguate between windows using "Tab" and "Up" and "Down" for data.
+Vous pouvez naviguer entre les fenêtres en utilisant "Tab" et "Up" et "Down" pour les données.
 
-<img src="./img/dive_malicious.png" alt="dive_malicious">
+<img src="../img/dive_malicious.png" alt="dive_malicious">
 
-Take a malicious image for the example, here we can see at the 7th layer the command for the reverse shell. \
-So don't forget to check all layers before running an image !
+Prenons l'exemple d'une image malveillante, ici nous pouvons voir à la 7ème couche la commande pour le reverse shell. \
+N'oubliez donc pas de vérifier toutes les couches avant d'exécuter une image !
 
 ***
 
-## 2. Docker Daemon Exposed 
+## 2. Docker Daemon Exposé 
 
-### <u>First case : we are outside a container</u>
+### <u>Premier cas : nous sommes à l'extérieur d'un conteneur</u>
 
-Imagine that a attacker have managed to gain a shell on the machine, but we have well (almost) configured the user right and he can't do anything.
-But, if the daemon is exposed and the user have the docker group : 
+Imaginez qu'un attaquant ait réussi à obtenir un shell sur la machine, mais que nous ayons bien (presque) configuré l'utilisateur et qu'il ne puisse rien faire.
+Mais, si le Daemon est exposé et que l'utilisateur a le groupe docker : 
 
 
 ```
 hellodocker@ubuntu:~$ find / -name docker.sock 2>/dev/null
-/run/docker.sock
+  /run/docker.sock
 hellodocker@ubuntu:~$ groups 
-hellodocker docker
+  hellodocker docker
 ```
 
-<img src="./img/privesc_outside.png">
+<img src="../img/privesc_outside.png">
 
-This command essentially mounting the host "/" directory to the "/mnt" directory in a new container, chrooting and then connecting via a shell. A simple command that give a root access at the attacker. We can use any image you want, a local image or download an image if there is a internet connection.
+Cette commande permet de monter le répertoire "/" de l'hôte dans le répertoire "/mnt" d'un nouveau conteneur, de le "chrooter" puis de se connecter via un shell. Une commande simple qui donne un accès root à l'attaquant. On peut utiliser l'image que l'on veut, une image locale ou télécharger une image s'il y a une connexion internet.
 
 <br>
 
-### <u>Second case : we are inside a container</u>
+### <u>Deuxième cas : nous sommes à l'intérieur d'un conteneur</u>
 
-The idea is the same as previously, if the user inside the container have a docker daemon exposed, we can escape the container.
+L'idée est la même que précédemment, si l'utilisateur à l'intérieur du conteneur a un démon docker exposé, nous pouvons échapper au conteneur.
 
 > docker run -v /:/mnt --rm -it alpine chroot /mnt sh
 
-And we have a shell on the host machine, we've breakout of the container.
-
-### <u> Hardening </u> 
-
-[How can I protect my container about that](./hardening.md)
+Et nous avons un shell root sur la machine hôte, nous sommes sortis du conteneur.
 
 ***
 
-## 3. Misconfigured Privileges and Capabilities
+## 3. Mauvaise configuration des Privileges et Capabilities
 
-Docker containers allow to start without the root access but with some privileges and capabilities. \
-By default, containers start with theses capabilities, who aren't necessary and which should not be used in prod :
+Les conteneurs Docker permettent de démarrer sans accès root mais avec certains privilèges et capacités. \
+Par défaut, les conteneurs démarrent avec ces capacités, qui ne sont pas nécessaires et qui ne devraient pas être utilisées en prod :
 
   - CAP_AUDIT_WRITE 
   - CAP_CHOWN
@@ -95,64 +91,60 @@ By default, containers start with theses capabilities, who aren't necessary and 
   - CAP_SETUID/CAP_SETGID
   - CAP_SYS_CHROOT
   
-You can list capabilities inside a container by using `capsh --print` (apt install libcap2-bin if doesn't exist)
+Vous pouvez lister les capacités à l'intérieur d'un conteneur en utilisant `capsh --print` (apt install libcap2-bin s'il n'existe pas).
 
-The most dangerous capability is `CAP_SYS_ADMIN` because you will be able to mount files from the host OS into the container.
+La capacité la plus dangereuse est `CAP_SYS_ADMIN` car vous pourrez monter des fichiers du système d'exploitation hôte dans le conteneur.
 
-<img src="./img/cap_sys_admin.png" alt="cap_sys_admin">
+<img src="../img/cap_sys_admin.png" alt="cap_sys_admin">
 
-A container would be vulnerable to this technique if run with the flags: 
+Un conteneur serait vulnérable à cette technique s'il est exécuté avec les arguments : 
 
 > --security-opt apparmor=unconfined --cap-add=SYS_ADMIN
 
-### <u> Hardening </u> 
+## 3.1 Je suis Root
 
-[How can I protect my container about that](./hardening.md)
+Les conteneurs docker bien configurés n'autorisent pas de commande comme `fdisk -l`. Cependant, si le container Docker est mal configuré et que l'argument `--privileged` est spécifié, il est possible d'obtenir les privilèges nécessaires pour voir le disque hôte.
 
-## 3.1 I own Root
+<img src="../img/fdisk.png" alt="fdisk">
 
-Well configured docker containers won't allow command like fdisk -l. However on missconfigured docker command where the flag `--privileged` is specified, it is possible to get the privileges to see the host drive.
+Nous pouvons voir **/dev/sda5** qui est la partition du système hôte.
 
-<img src="./img/fdisk.png" alt="fdisk">
+<img src="../img/iownroot.png" alt="iownroot">
 
-We can see **/dev/sda5** who's the host partition.
-
-<img src="./img/iownroot.png" alt="iownroot">
-
-We can now read file from host 
+Nous pouvons maintenant lire les fichiers du système hôte.
 
 ## 4. Shared Namespaces
 
 TODO
 
-## Bonus : How to determining if you are in a container
+## Bonus : Déterminer si nous sommes dans un container
 
-### <u>Method 1 : processes </u>
+### <u>Méthode 1 : processes </u>
 
-Container often have very little processes running, run a `ps faux` to see them.
+Les conteneurs ont souvent très peu de processus en cours, lancez un `ps faux` pour les voir.
 
-<img src="./img/processes.png" alt="processes">
+<img src="../img/processes.png" alt="processes">
 
-### <u>Method 2 : dockerenv </u>
+### <u>Méthode 2 : dockerenv </u>
 
-Docker containers allow environnements variables provides by the host, using a **.dockerenv** file. \
-You can find this file in **/**. This file is created even the host don't provide any env variable.
+Les conteneurs Docker autorisent les variables d'environnement fournies par l'hôte, à l'aide d'un fichier **.dockerenv**. \
+Vous pouvez trouver ce fichier dans **/**. Ce fichier est créé même si l'hôte ne fournit pas de variable env.
 
-<img src="./img/dockerenv.png" alt="dockerenv">
+<img src="../img/dockerenv.png" alt="dockerenv">
 
-### <u>Method 3 : cgroup </u>
+### <u>Méthode 3 : cgroup </u>
 
-Cgroups are used by containers such as Docker. Find them in **/proc/1/cgroup**.
+Les Cgroups sont utilisés par les conteneurs tels que Docker. Vous les trouverez dans **/proc/1/cgroup**.
 
-<img src="./img/cgroup.png" alt="cgroup">
+<img src="../img/cgroup.png" alt="cgroup">
 
 
 
 ## Automatisation 
 
-You can launch scripts to see if you'r vulnerable to docker escape or other misconfiguration.
+Vous pouvez lancer des scripts pour voir si vous êtes vulnérable à un échappement de docker ou à une autre mauvaise configuration.
 
-## Inside container : 
+## À l'intérieur d'un container : 
 
 - [Deepce](https://github.com/stealthcopter/deepce/)
   Docker Enumeration, Escalation of Privileges and Container Escapes (DEEPCE)
@@ -191,6 +183,6 @@ gid=0(root)
 [+] Privilege Mode is disabled
 ```
 
-## Outside Container 
+## À l'extérieur d'un container 
 
 - [Docker-Bench-Security](https://github.com/docker/docker-bench-security) : The Docker Bench for Security is a script that checks for dozens of common best-practices around deploying Docker containers in production. 
