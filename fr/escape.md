@@ -1,6 +1,6 @@
 # Docker Escape Stylecheat
 
-## 1. Docker image analysis
+## 1. Analsye d'image docker
 
 Imaginez que nous avons téléchargé une image et que nous voulons la lancer sans aucune vérification.
 

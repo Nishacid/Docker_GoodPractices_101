@@ -1,7 +1,7 @@
-# Docker good practices 101
+# Docker bonnes pratiques 101
 
-## Summary 
+## Sommaire 
 
-- [Docker Escape](./escape.md)
-- [Hardening a Docker Contaniner](./hardening.md)
-- [Docker Configuration Checklist](./checklist.md)
+- [Exploitation de vulnérabilité Docker](./escape.md)
+- [Hardening d'un container Docker](./hardening.md)
+- [Checklist de configuration d'un container](./checklist.md)
