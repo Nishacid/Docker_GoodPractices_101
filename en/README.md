@@ -1,6 +1,4 @@
-# Docker_GoodPractices_101
-
-## Docker good practices 101
+# Docker good practices 101
 
 ## Summary 
 

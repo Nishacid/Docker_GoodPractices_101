@@ -78,25 +78,50 @@ And we have a shell on the host machine, we've breakout of the container.
 
 ## 3. Misconfigured Privileges and Capabilities
 
-TODO 
+Docker containers allow to start without the root access but with some privileges and capabilities. \
+By default, containers start with theses capabilities, who aren't necessary and which should not be used in prod :
+
+  - CAP_AUDIT_WRITE 
+  - CAP_CHOWN
+  - CAP_DAC_OVERRIDE
+  - CAP_FOWNER
+  - CAP_FSETID
+  - CAP_KILL
+  - CAP_NET_BIND_SERVICE
+  - CAP_NET_RAW
+  - CAP_MKNOD
+  - CAP_SETFC
+  - CAP_SETCAP
+  - CAP_SETUID/CAP_SETGID
+  - CAP_SYS_CHROOT
+  
+You can list capabilities inside a container by using `capsh --print` (apt install libcap2-bin if doesn't exist)
+
+The most dangerous capability is `CAP_SYS_ADMIN` because you will be able to mount files from the host OS into the container.
+
+<img src="./img/cap_sys_admin.png" alt="cap_sys_admin">
+
+A container would be vulnerable to this technique if run with the flags: 
+
+> --security-opt apparmor=unconfined --cap-add=SYS_ADMIN
+
+### <u> Hardening </u> 
+
+[How can I protect my container about that](./hardening.md)
 
 ## 3.1 I own Root
 
-Well configured docker containers won't allow command like fdisk -l. However on missconfigured docker command where the flag --privileged is specified, it is possible to get the privileges to see the host drive.
+Well configured docker containers won't allow command like fdisk -l. However on missconfigured docker command where the flag `--privileged` is specified, it is possible to get the privileges to see the host drive.
 
 <img src="./img/fdisk.png" alt="fdisk">
 
-We can see /dev/sda5 who's the host partition.
+We can see **/dev/sda5** who's the host partition.
 
 <img src="./img/iownroot.png" alt="iownroot">
 
 We can now read file from host 
 
 ## 4. Shared Namespaces
-
-TODO
-
-## 5. API Firewall Bypass 
 
 TODO
 
@@ -127,11 +152,13 @@ Cgroups are used by containers such as Docker. Find them in **/proc/1/cgroup**.
 
 You can launch scripts to see if you'r vulnerable to docker escape or other misconfiguration.
 
+## Inside container : 
+
 - [Deepce](https://github.com/stealthcopter/deepce/)
   Docker Enumeration, Escalation of Privileges and Container Escapes (DEEPCE)
 
 - [LinPEAS](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS) 
-  Local Enumeration for Privileges Escalation, with a dedicated part for docker containers.
+  Local Enumeration for Privileges Escalation, with a dedicated part for docker containers. \
   EX : 
 ```
 ═════════════════════════════════════════╣ Containers ╠══════════════════════════════════════════
@@ -163,3 +190,7 @@ gid=0(root)
 
 [+] Privilege Mode is disabled
 ```
+
+## Outside Container 
+
+- [Docker-Bench-Security](https://github.com/docker/docker-bench-security) : The Docker Bench for Security is a script that checks for dozens of common best-practices around deploying Docker containers in production. 
