@@ -1,9 +1,5 @@
 # Docker configuration checklist
 
-- 1. Inspect the image before usage [1. Docker image analysis](escape.md) 
-
-# Docker configuration checklist
-
 - Inspect the Docker image before usage, isn't impossible the image is backdoored or malicious.
 
 - Do not use the `--privileged` flag or mount a Docker socket inside the container. The docker socket allows for spawning containers, so it is an easy way to take full control of the host, for example, by running another container with the `--privileged` flag.

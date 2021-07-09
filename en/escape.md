@@ -1,4 +1,4 @@
-# Docker Escape Stylecheat
+# Exploitation of Docker vulnerabilities
 
 ## 1. Docker image analysis
 

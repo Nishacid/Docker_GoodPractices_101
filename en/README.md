@@ -3,5 +3,5 @@
 ## Summary 
 
 - [Docker Escape](./escape.md)
-- [Hardening a Docker Contaniner](./hardening.md)
+- [Hardening of a Docker Contaniner](./hardening.md)
 - [Docker Configuration Checklist](./checklist.md)

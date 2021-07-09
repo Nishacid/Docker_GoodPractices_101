@@ -1,4 +1,4 @@
-# Hardening a Docker Contaniner
+# Hardening of a Docker Contaniner
 
 ## 1. Docker Daemon Exposed
 
